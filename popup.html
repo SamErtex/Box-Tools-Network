@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Box Tools Network</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;width:370px;min-height:300px;max-height:620px;overflow-y:auto;font-family:Inter,Segoe UI,Arial,sans-serif;color:#eef2f7;background:#11151b}
+  .header{padding:16px 17px 14px;background:linear-gradient(135deg,#171d26 0%,#101318 100%);border-bottom:1px solid #252c36;position:sticky;top:0;z-index:2}
+  .brand{display:flex;align-items:center;gap:11px}.logo{width:38px;height:38px;border-radius:11px;object-fit:cover;box-shadow:0 5px 18px rgba(0,0,0,.35)}
+  .title{font-size:15px;font-weight:700;letter-spacing:.1px}.subtitle{font-size:11px;color:#8f9aaa;margin-top:3px}
+  .content{padding:13px}.section-title{margin:2px 4px 9px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:#7f8a9a}
+  .card{border:1px solid #29313d;background:#181d25;border-radius:13px;overflow:hidden;margin-bottom:12px}
+  .action{width:100%;border:0;background:transparent;color:#eef2f7;display:flex;align-items:center;gap:12px;padding:13px 14px;text-align:left;cursor:pointer;transition:background .15s ease}.action:hover{background:#202733}.action:active{background:#252e3a}
+  .icon{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:#222a35;color:#b8c8ff;font-size:15px;font-weight:800;flex:none}
+  .action-text{flex:1;min-width:0}.action-title{display:block;font-size:13px;font-weight:650}.action-desc{display:block;font-size:11px;color:#8994a4;margin-top:3px;line-height:1.35}.arrow{color:#687383;font-size:18px}
+  .dev-row{display:flex;align-items:center;gap:12px;padding:13px 14px}.dev-info{flex:1;min-width:0}.dev-title{font-size:13px;font-weight:600}.dev-desc{font-size:11px;color:#8994a4;margin-top:3px;line-height:1.35}
+  .switch{position:relative;width:42px;height:24px;flex:none}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:24px;background:#3a424e;cursor:pointer;transition:.18s ease}.slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.18s ease;box-shadow:0 2px 5px rgba(0,0,0,.3)}.switch input:checked + .slider{background:#2f8f63}.switch input:checked + .slider:before{transform:translateX(18px)}
+  .status{display:flex;align-items:center;gap:7px;padding:0 14px 12px 60px;font-size:10px;color:#7f8a99}.dot{width:6px;height:6px;border-radius:50%;background:#697482}.dot.on{background:#3fc47e;box-shadow:0 0 7px rgba(63,196,126,.55)}
+  .message{min-height:17px;margin:2px 4px 0;font-size:10px;color:#7f8a99;text-align:center}.message.ok{color:#55c889}.message.error{color:#e57b7b}
+  .footer{padding:8px 16px 12px;text-align:center;color:#596372;font-size:9px}
+  [hidden]{display:none!important}
+  .ip-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:11px}.mini-btn{border:1px solid #323d4d;background:#202733;color:#dce5f5;border-radius:8px;padding:7px 9px;font-size:11px;cursor:pointer}.mini-btn:hover{background:#2a3443}.mini-btn:disabled{opacity:.55;cursor:wait}.ip-toolbar-main{flex:1;min-width:0}.ip-heading{font-size:13px;font-weight:700}.ip-subheading{font-size:10px;color:#8b96a7;margin-top:2px}
+  .page-summary{border:1px solid #344258;background:linear-gradient(135deg,#1b2637,#181d25);border-radius:12px;padding:12px;margin-bottom:12px}.summary-label{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#8998ad}.summary-host{font-size:13px;font-weight:700;overflow-wrap:anywhere;margin-top:5px}.summary-ip-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px}.ip-address{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;color:#dfe8ff;overflow-wrap:anywhere}.badge{display:inline-flex;align-items:center;border-radius:6px;padding:3px 6px;font-size:9px;font-weight:750;letter-spacing:.3px;background:#283344;color:#b7c7de}.badge.v4{background:#493a24;color:#ffd89a}.badge.v6{background:#233c55;color:#a9dcff}.badge.secure{background:#203c32;color:#83e3b3}.badge.insecure{background:#45302d;color:#ffb5a8}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}.stat{padding:9px 8px;background:#181d25;border:1px solid #29313d;border-radius:9px;text-align:center}.stat-value{display:block;font-size:15px;font-weight:750;color:#e8edfa}.stat-label{display:block;font-size:9px;color:#8994a4;margin-top:3px}
+  .list-title{display:flex;justify-content:space-between;align-items:center;margin:0 2px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#8d98a9;font-weight:750}.domain-list{display:flex;flex-direction:column;gap:8px}.domain-row{border:1px solid #29313d;background:#181d25;border-radius:10px;padding:10px}.domain-head{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}.domain-name{font-size:12px;font-weight:650;overflow-wrap:anywhere;min-width:0;flex:1}.domain-meta{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end}.domain-ips{display:flex;flex-direction:column;gap:5px;margin-top:8px}.ip-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:#131820;border-radius:6px;padding:6px 7px}.ip-req{font-size:9px;color:#8290a4;margin-left:auto}.empty{border:1px dashed #374254;border-radius:10px;padding:17px 13px;text-align:center;color:#9aa5b5;font-size:11px;line-height:1.55}.updated{font-size:9px;color:#677486;text-align:right;margin-top:8px}
+</style>
+</head>
+<body>
+<header class="header"><div class="brand"><img class="logo" src="icon128.png" alt="Box Tools Network"><div><div class="title">Box Tools Network</div><div class="subtitle">Ferramentas para o suporte IXC</div></div></div></header>
+<main class="content" id="homeView">
+  <div class="section-title">Ações rápidas</div>
+  <div class="card">
+    <div class="dev-row">
+      <span class="icon" aria-hidden="true">◉</span>
+      <span class="dev-info"><span class="dev-title">Revelar senhas automaticamente</span><span class="dev-desc">Mostra os campos de senha assim que forem detectados nas páginas.</span></span>
+      <label class="switch" title="Ativar ou desativar a revelação automática de senhas"><input id="autoRevealPasswords" type="checkbox" aria-label="Revelar senhas automaticamente"><span class="slider"></span></label>
+    </div>
+    <div class="status"><span id="passwordRevealStatusDot" class="dot"></span><span id="passwordRevealStatusText">Carregando preferência…</span></div>
+  </div>
+  <div class="section-title">Validação de rede</div>
+  <div class="card"><button class="action" id="validateIp" type="button"><span class="icon">4/6</span><span class="action-text"><span class="action-title">Validar IP</span><span class="action-desc">Capture IPs IPv4/IPv6 das conexões desta aba, sob demanda.</span></span><span class="arrow">›</span></button></div>
+  <div class="section-title">Ferramentas</div>
+  <div class="card"><div class="dev-row"><span class="icon">⚙</span><span class="dev-info"><span class="dev-title">IXC Dev Tools</span><span class="dev-desc">Disponibiliza o painel de ferramentas para desenvolvimento.</span></span><label class="switch" title="Ativar ou desativar Dev Tools"><input id="devTools" type="checkbox"><span class="slider"></span></label></div><div class="status"><span id="statusDot" class="dot"></span><span id="statusText">Dev Tools desativado</span></div></div>
+  <div id="message" class="message" aria-live="polite"></div>
+</main>
+<section class="content" id="ipView" hidden>
+  <div class="ip-toolbar"><button class="mini-btn" id="backHome" type="button">‹ Voltar</button><div class="ip-toolbar-main"><div class="ip-heading">Validador de IP</div><div class="ip-subheading">Dados das conexões reais da página</div></div><button class="mini-btn" id="refreshIp" type="button" title="Atualizar">↻</button></div>
+  <div class="page-summary"><div class="summary-label">Página atual</div><div class="summary-host" id="pageHost">Aguardando dados…</div><div class="summary-ip-row"><span class="badge" id="pageProtocol">—</span><span class="badge" id="pageFamily">IP não identificado</span><span class="ip-address" id="pageIp"></span></div></div>
+  <div class="stats"><div class="stat"><span class="stat-value" id="statDomains">0</span><span class="stat-label">Domínios</span></div><div class="stat"><span class="stat-value" id="statIps">0</span><span class="stat-label">IPs únicos</span></div><div class="stat"><span class="stat-value" id="statRequests">0</span><span class="stat-label">Respostas</span></div></div>
+  <div class="list-title"><span>Domínios e endereços</span><span id="collectionState">Ao vivo</span></div>
+  <div id="domainList" class="domain-list"><div class="empty">Iniciando coleta das conexões desta aba…</div></div>
+  <div id="ipError" class="message error" aria-live="polite"></div><div id="ipUpdated" class="updated"></div>
+</section>
+<div class="footer" id="extensionVersion">Box Tools Network v…</div>
+<script src="popup.js"></script>
+</body>
+</html>

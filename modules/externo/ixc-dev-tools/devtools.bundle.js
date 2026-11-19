@@ -1,0 +1,1 @@
+chrome.devtools.panels.create("Dev Tools from IXC DevTools","icon128.png","panel.html");

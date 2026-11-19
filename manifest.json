@@ -1,0 +1,103 @@
+{
+  "manifest_version": 3,
+  "name": "Box Tools Network",
+  "version": "7.0.1",
+  "description": "Ferramentas para suporte IXC, automação de atendimento, análise de IP, acesso às chaves e DevTools.",
+  "permissions": [
+    "storage",
+    "notifications",
+    "alarms",
+    "tabs",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "default_title": "Box Tools Network"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://suporte.ixcsoft.com.br/*"
+      ],
+      "js": [
+        "modules/opa/page-bridge.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "css": []
+    },
+    {
+      "matches": [
+        "https://suporte.ixcsoft.com.br/*"
+      ],
+      "js": [
+        "modules/opa/content.js",
+        "modules/opa-externo/redirect.js"
+      ],
+      "css": [
+        "modules/opa/styles.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://*/adm.php",
+        "https://*/adm.php"
+      ],
+      "js": [
+        "modules/externo/ixc-dev-tools/content.bundle.js"
+      ],
+      "run_at": "document_idle",
+      "css": []
+    },
+    {
+      "matches": [
+        "http://*/adm.php*",
+        "https://*/adm.php*",
+        "http://*/*/adm.php*",
+        "https://*/*/adm.php*",
+        "http://*/app/login*",
+        "https://*/app/login*",
+        "http://*/*/app/login*",
+        "https://*/*/app/login*"
+      ],
+      "js": [
+        "modules/externo/reveal-password/content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "css": []
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "modules/opa/page-bridge.js",
+        "modules/externo/ixc-dev-tools/initModals.js",
+        "e99cb3e708e397f3d230.svg"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "devtools_page": "devtools.html",
+  "options_page": "options.html",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

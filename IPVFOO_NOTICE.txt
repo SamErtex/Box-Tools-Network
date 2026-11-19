@@ -1,0 +1,18 @@
+VALIDADOR DE IP — NOTA DE ATRIBUIÇÃO
+
+Projeto de referência: IPvFoo
+Autor original: Paul Marks
+Repositório: https://github.com/pmarks-net/ipvfoo
+Licença do projeto original: Apache License 2.0
+
+A Box Tools Network inclui um módulo integrado que implementa a função central de
+visualização de endereços IP por hostname usando eventos webRequest do navegador
+somente enquanto o usuário mantém aberta a tela Validador de IP, com interface
+própria adaptada ao visual da Box Tools Network. Não é o pacote
+original completo do IPvFoo: preferências, menus de consulta externa e outros
+recursos não relacionados não foram incorporados. A implementação integrada não
+realiza requisições de rede adicionais para descobrir IPs. O botão de atualização
+recarrega a página atual para capturar as conexões da nova navegação.
+
+A licença Apache 2.0 pode ser consultada em:
+https://www.apache.org/licenses/LICENSE-2.0

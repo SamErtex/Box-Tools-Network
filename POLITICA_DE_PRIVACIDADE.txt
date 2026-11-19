@@ -1,0 +1,177 @@
+POLÍTICA DE PRIVACIDADE — Box Tools Network
+Versão: 7.0.0
+Última atualização: 22/10/2026
+
+1. OBJETIVO
+===========
+A Box Tools Network é uma extensão para Chrome destinada a auxiliar o trabalho
+dentro do sistema IXC. Ela reúne automação de atendimento, monitoramento,
+notificações, ferramentas de desenvolvimento e funções auxiliares de produtividade.
+
+2. DADOS E INFORMAÇÕES PROCESSADOS
+===================================
+Dependendo da função utilizada, a extensão pode acessar informações que já
+estão disponíveis na sessão autenticada do usuário, incluindo:
+
+- identificadores de atendimentos e rotas;
+- protocolos;
+- departamento e fila;
+- status e informações de permanência na fila;
+- identificador do usuário atendente;
+- eventos de assunção e transferência;
+- eventos necessários para verificar comunicação durante o monitoramento;
+- elementos da página /adm.php necessários ao funcionamento do IXC Dev Tools;
+- a presença e o tipo de campos de senha somente nas páginas em que o content script é injetado (/adm.php ou /app/login); a revelação depende da preferência, e o conteúdo digitado não é lido, registrado ou transmitido;
+- hostnames, endereços IP remotos e metadados básicos de requisições observadas pelo navegador somente enquanto a tela Validador de IP está ativa na aba selecionada.
+
+A extensão não possui um formulário próprio para cadastro de dados pessoais.
+
+3. FINALIDADES
+==============
+As informações acessadas são utilizadas exclusivamente para executar as
+funções da extensão, incluindo:
+
+- automatizar a assunção de atendimentos conforme as regras do OPA;
+- identificar e acompanhar atendimentos em fila;
+- monitorar temporariamente a comunicação após uma assunção;
+- cancelar monitoramentos após transferência ou comunicação aplicável;
+- emitir notificações locais;
+- marcar o atendimento como "Aguardando resposta do cliente" quando essa
+  função estiver sendo executada;
+- fornecer as ferramentas de desenvolvimento do IXC Dev Tools;
+- revelar visualmente campos de senha quando a opção correspondente estiver ativada;
+- exibir os IPs reportados pelo navegador para as conexões observadas enquanto o Validador de IP está ativo na aba selecionada;
+- reescrever links de URL base e IP externo no painel “Chaves ativas”, usando
+  o host do próprio link e direcionando para /adm.php nesse mesmo host.
+
+4. IXC DEV TOOLS
+================
+O IXC Dev Tools incluído na extensão mantém o código empacotado originalmente
+fornecido para a ferramenta. Quando ativado, seu content script pode alterar
+a apresentação e adicionar recursos à interface de páginas /adm.php para
+fins de desenvolvimento e análise.
+
+O estado de ativação do Dev Tools é armazenado localmente no Chrome.
+
+O painel interno do Chrome DevTools respeita essa mesma preferência. Quando o
+Dev Tools está desativado, a página do painel mostra uma mensagem de bloqueio e
+não executa o bundle original do painel.
+
+5. REVELAÇÃO AUTOMÁTICA DE CAMPOS DE SENHA
+========================================
+O content script só é injetado em URLs cujos caminhos correspondem a /adm.php ou
+/app/login. Nesses caminhos, identifica elementos input do tipo password e os revela
+quando a opção “Revelar senhas automaticamente” está ativada no popup. A regra considera
+o caminho da URL, não palavras no domínio, query string ou fragmento. Os campos que
+aparecem dinamicamente também são tratados. A preferência é armazenada localmente no
+Chrome. A extensão não lê o valor do campo para outra finalidade, não o armazena e não
+o envia a servidores. Como os valores podem ficar visíveis na tela
+enquanto a opção está ativada, use-a apenas em ambientes nos quais a visualização
+seja apropriada.
+
+5A. VALIDADOR DE IP (INTEGRAÇÃO INSPIRADA NO IPvFoo)
+===================================================
+O listener da API webRequest permanece registrado para respeitar o ciclo de vida do
+Service Worker do Chrome, mas retorna imediatamente para abas sem captura ativa. O
+módulo só processa e registra URLs, hosts e IPs da aba selecionada enquanto o usuário
+está na tela “Validar IP”; fora dessa tela, não agrega nem persiste dados de requisição.
+O botão de atualização recarrega a aba e reinicia a captura para registrar as conexões
+reais dessa navegação. Os dados resumidos são mantidos temporariamente em
+chrome.storage.session, com gravações agrupadas, e removidos quando o usuário volta
+à tela inicial do popup ou a aba é fechada. Capturas sem ativação válida são removidas
+na inicialização do módulo. O validador não realiza consultas DNS próprias nem gera
+requisições extras para descobrir IPs, e não envia esses resumos a servidores próprios.
+
+6. ARMAZENAMENTO LOCAL
+======================
+Configurações e estados temporários necessários ao funcionamento podem ser
+armazenados no chrome.storage.local.
+
+O armazenamento local pode incluir, por exemplo, as preferências de ativação do
+Dev Tools e da revelação automática de senhas, além de informações temporárias
+necessárias para monitorar atendimentos.
+
+A extensão não mantém um banco de dados próprio em servidor para armazenar
+atendimentos ou senhas.
+
+7. COMUNICAÇÃO COM O SISTEMA IXC
+=================================
+Quando uma função precisa executar uma ação no sistema IXC, a extensão usa a
+sessão autenticada do próprio usuário e os mecanismos necessários do sistema.
+Exemplos incluem ações relacionadas à assunção de atendimento e ao estado de
+"Aguardando resposta do cliente".
+
+Essas comunicações são feitas com o sistema que o usuário já está acessando.
+A extensão não envia esses dados para um servidor próprio para publicidade,
+marketing ou venda de informações.
+
+8. NOTIFICAÇÕES E ALARMES
+==========================
+A extensão pode utilizar as APIs de notificações e alarmes do Chrome para
+acompanhar tarefas temporárias e informar o usuário sobre eventos relacionados
+à automação. As notificações nativas criadas pela extensão são removidas
+automaticamente após aproximadamente 8 segundos.
+
+Após assumir um atendimento, o OPA tenta marcar “Aguardando resposta do cliente”.
+A solicitação é considerada concluída quando a resposta do sistema confirma sucesso
+(HTTP bem-sucedido e tipo de resultado “success”). Em caso de falha, são feitas
+até quatro tentativas no total: uma inicial e até três retentativas. O resultado é
+informado por uma mensagem visual dentro do OPA. Esse fluxo não cria um histórico
+persistente de tentativas ou erros.
+
+9. COMPARTILHAMENTO
+===================
+A extensão não vende, aluga ou compartilha dados pessoais ou dados de
+atendimento com terceiros para publicidade ou marketing.
+
+Não há serviço próprio de análise, publicidade ou banco de dados remoto
+incluído na extensão.
+
+10. PERMISSÕES
+==============
+As permissões declaradas no manifest.json são utilizadas pelas funcionalidades
+correspondentes da extensão, incluindo:
+
+- storage: guardar preferências e estados temporários;
+- notifications: emitir notificações locais;
+- alarms: executar verificações temporizadas;
+- activeTab e scripting: suporte às ações de aba da extensão;
+- tabs: consultar/recarregar abas, limpar capturas de IP quando uma aba fecha e identificar a aba atual;
+- webRequest: observar respostas HTTP/HTTPS e obter os endereços IP reportados pelo Chrome somente enquanto o Validador de IP está ativo na aba selecionada;
+- host permissions: o manifesto declara <all_urls> para dar suporte ao Dev Tools
+  em diferentes domínios de clientes; a alteração de links de chaves continua
+  restrita aos links identificados na lista “Chaves ativas” do suporte IXC.
+
+11. CONTROLE DO USUÁRIO
+=======================
+O usuário controla a ativação do Dev Tools e a revelação automática de senhas pelo
+popup da extensão, e controla as funções automáticas do OPA pela própria interface.
+A captura do Validador de IP só começa quando o usuário entra nessa tela e é encerrada
+ao voltar à tela inicial; a atualização recarrega a aba para registrar as conexões da
+nova navegação.
+
+Campos password são revelados visualmente quando detectados e a opção “Revelar senhas automaticamente” está ativada no popup.
+
+A extensão também pode ser desativada ou removida pelo gerenciador de
+extensões do Chrome.
+
+12. SEGURANÇA
+=============
+A extensão procura limitar o processamento ao necessário para suas funções.
+Os dados temporários de monitoramento são mantidos localmente e usados para
+controlar a automação.
+
+A extensão não deve ser utilizada para compartilhar senhas ou dados de
+clientes fora dos sistemas e procedimentos autorizados pela organização.
+
+13. ALTERAÇÕES DA POLÍTICA
+===========================
+Esta política pode ser atualizada quando houver mudanças relevantes nas
+funcionalidades, no processamento de dados ou nos requisitos aplicáveis à
+extensão.
+
+14. CONTATO
+===========
+Dúvidas sobre esta política, sobre o uso da extensão ou sobre o tratamento de
+dados devem ser direcionadas ao responsável pela disponibilização e
+administração da extensão.

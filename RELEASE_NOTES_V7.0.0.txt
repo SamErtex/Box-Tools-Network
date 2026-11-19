@@ -1,0 +1,59 @@
+BOX TOOLS NETWORK — RELEASE NOTES 7.0.0
+
+OPA / NOVA INTERFACE IXC
+
+- Mantida a versão 7.0.0 no manifest.json.
+- page-bridge.js roda no MAIN world em document_start e captura eventos Socket.IO da interface.
+- A fila é lida por customer-services-ui:customer-service-queues:department:list.
+- A assunção automática usa customer-services-ui:customer-service-actions:department:take-over,
+  enviando customerServicesData: [{ id, channel }].
+- A confirmação é correlacionada pelo evento customer-service:take-over e validada pelo ID
+  do atendimento, status EA e atendente associado; a lista in-progress continua como confirmação
+  complementar e como detecção de assunções manuais.
+- A marcação de aguardando cliente usa POST /services/customer-services-ui/
+  customer-service-actions/state/set-awaiting-for-customer com JSON:
+  { customerServicesIds: [id], isAwaitingForCustomer: true }.
+- Sucesso da marcação exige response.ok, type === "success" e data.success === true.
+- Em falha, são feitas até três novas tentativas após 750 ms, 1.500 ms e 3.000 ms.
+- Sucesso/falha da marcação gera toast no OPA. A marcação não gera notificação nativa vermelha.
+- Mantidos os demais módulos, permissões, telas, popup, Dev Tools, validador de IP,
+  redirecionamento de links de chaves e alarmes/notificações de pós-assunção.
+
+VALIDAÇÕES LOCAIS
+- node --check nos arquivos JavaScript alterados e nos scripts principais.
+- Validação JSON do manifest.json.
+- Teste automatizado local do evento Socket.IO de assunção, confirmação e chamada HTTP
+  de marcação como aguardando cliente.
+
+LIMITAÇÃO
+- A validação com o backend real continua dependendo do teste do usuário na sessão IXC.
+
+
+MELHORIA OPA — TEMPO NA FILA ATUAL
+- O tempo exibido nos cartões da fila passa a representar o tempo desde a última transferência de departamento.
+- Quando não existe transferência de departamento, utiliza a data de abertura do atendimento.
+- A interface é atualizada em tempo real, sem recarregar a página.
+- A atualização é conservadora: só altera os rótulos quando a quantidade de temporizadores visíveis corresponde à quantidade de registros recebidos do Socket.IO.
+
+Diagnostico temporario da fila (2026-11-19)
+- Debug ativo (`teste1234()`): captura eventos Socket.IO de entrada e saída relacionados à fila, incluindo payload completo.
+- Registra o payload original recebido em `department:list`, antes da transformação do page-bridge.
+- Registra a análise individual de elegibilidade dos registros recebidos pelo content.js, com o resultado de cada condição atual e o motivo de rejeição.
+- Não altera a regra de elegibilidade nem o fluxo de assunção.
+- Os dados completos podem conter informações de clientes. Desative o debug com `encerrou1234()` e não compartilhe os logs sem revisar/remover dados sensíveis.
+
+
+AJUSTE OPA — CONTAGEM DA FILA E DEPARTAMENTO ACS (2026-11-19)
+- A fila publicada ao content.js inclui somente registros com status AG, sem id_atendente e ainda não confirmados como assumidos.
+- Ao confirmar uma assunção, o registro é atualizado imediatamente no snapshot local para status EA e com o atendente confirmado.
+- Uma cópia antiga AG recebida posteriormente não volta a contar como elegível enquanto a assunção confirmada permanecer monitorada.
+- Adicionado o departamento ACS - Suporte - IXC ACS, identificado pelo setor._id 62fceed199272a70d32a5994.
+- O histórico de atendentes (array atendentes) não é usado para determinar atribuição atual; a regra utiliza id_atendente.
+
+
+Atualização automática da fila (diagnóstico Socket.IO)
+- Reproduz a sequência nativa de carregamento da fila usando os argumentos confirmados: advancedFilters=[], roleFilter=""; page=1; preferences.sortBy="interaction" e sortOrder="desc".
+- Utiliza os argumentos capturados da interface quando disponíveis e mantém os argumentos confirmados como fallback para a primeira carga, sem exigir abertura manual da aba Fila.
+- Eventos customer-service:transfer-to-department e customer-service:new agendam atualização da lista.
+- Debounce de 350 ms e intervalo mínimo de 1.200 ms entre solicitações para evitar excesso de emissões.
+- O snapshot local só é considerado atualizado quando chega uma nova resposta department:list.

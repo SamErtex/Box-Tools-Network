@@ -1,8 +1,0 @@
-Box Tools Network — versão 7.0.1
-
-- Removida a permissão `scripting`, que não era utilizada pela extensão.
-- Removida a permissão `activeTab`, que não era utilizada pela extensão.
-- Mantidas as permissões necessárias aos recursos implementados.
-- Restringidas as permissões de host aos esquemas HTTP e HTTPS.
-
-Esta versão é uma atualização de permissões/manifesto. Consulte o README para instalação e estrutura do projeto.

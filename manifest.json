@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Box Tools Network",
-  "version": "7.0.1",
+  "version": "7.0.2",
   "description": "Ferramentas para suporte IXC, automação de atendimento, análise de IP, acesso às chaves e DevTools.",
   "permissions": [
     "storage",

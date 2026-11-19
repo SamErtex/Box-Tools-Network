@@ -10,10 +10,9 @@
   const MARK_WAITING_RETRY_DELAYS = [750, 1500, 3000];
   const ASSUMPTION_CONFIRMATION_TIMEOUT = 18000;
   const QUEUE_REFRESH_DEBOUNCE_MS = 350;
-  const QUEUE_REFRESH_MIN_INTERVAL_MS = 1200;
+  const QUEUE_REFRESH_MIN_INTERVAL_MS = 3000;
   const waitingMarkInFlight = new Set();
   const monitoredIds = new Set();
-  const confirmedAssumptions = new Set();
   const knownWaitingIds = new Set();
   const pendingAssumptions = new Map();
   const activeIds = new Set();
@@ -29,6 +28,7 @@
   let pendingQueueRefresh = false;
   let queueRefreshTimer = null;
   let lastQueueRefreshAt = 0;
+  let nextAssumptionRequestAt = 0;
   let queueRefreshInFlight = false;
   // Sequência observada na interface; o fallback usa os argumentos reais
   // capturados no teste quando ainda não houve abertura manual da aba Fila.
@@ -260,19 +260,12 @@
 
   function isWaitingQueueItem(item) {
     const id = item?._id || item?.id;
-    const attendantId = normalizeId(item?.id_atendente || item?.attendant?.id || item?.attendant);
-    return Boolean(
-      id &&
-      getStatus(item) === "AG" &&
-      !attendantId &&
-      !confirmedAssumptions.has(id)
-    );
+    // Regra solicitada: considera o status AG, sem bloquear por histórico de
+    // assunção nem pela presença/ausência de id_atendente.
+    return Boolean(id && getStatus(item) === "AG");
   }
 
   function publishQueue() {
-    // department:list pode continuar contendo, por alguns instantes, um registro
-    // antigo mesmo depois da confirmação da assunção. A fila do OPA deve refletir
-    // apenas atendimentos realmente aguardando: AG, sem atendente e não confirmados.
     const queue = latestDepartmentItems
       .filter(isWaitingQueueItem)
       .map(toQueueRecord)
@@ -292,16 +285,17 @@
       source,
       matchedOwnRequest,
       ownPendingRequest: isOwnPendingRequest,
-      status: getStatus(item),
-      confirmedAlready: confirmedAssumptions.has(id)
+      status: getStatus(item)
     });
-    if (!id || (confirmedAssumptions.has(id) && !isOwnPendingRequest)) return;
+    if (!id) return;
 
     // A resposta customer-service:take-over confirma uma solicitação que este
     // bridge acabou de emitir. Para assunções manuais, exigimos o ID do usuário
     // autenticado para não confundir ações de outros atendentes.
+    // id_atendente é exigido apenas para validar que a assunção foi efetivada;
+    // não é usado para excluir registros da fila nem para decidir elegibilidade.
     if (!attendantId) {
-      debugLog("Confirmação ignorada: atendimento sem id_atendente.", { id });
+      debugLog("Confirmação ainda sem identificador do atendente; aguardando confirmação completa.", { id });
       return;
     }
     if (currentUserId && attendantId !== currentUserId) {
@@ -314,7 +308,6 @@
     }
 
     if (pending?.timeout) clearTimeout(pending.timeout);
-    confirmedAssumptions.add(id);
     pendingAssumptions.delete(id);
     knownWaitingIds.delete(id);
     activeIds.add(id);
@@ -372,10 +365,6 @@
       receivedAt: new Date().toISOString(),
       total: items.length,
       waiting: items.filter(isWaitingQueueItem).length,
-      ignoredAlreadyConfirmed: items.filter(item => {
-        const id = item?._id || item?.id;
-        return Boolean(id && confirmedAssumptions.has(id));
-      }).length,
       socketBackendReady,
       currentUserId,
       payloadType: Array.isArray(payload) ? "array" : typeof payload,
@@ -421,11 +410,9 @@
       if (
         monitoredIds.has(id) &&
         getStatus(item) === "AG" &&
-        !activeIds.has(id) &&
-        !confirmedAssumptions.has(id)
+        !activeIds.has(id)
       ) {
-        // Não tratar uma cópia AG atrasada como retorno à fila. Uma assunção
-        // confirmada permanece excluída até o ciclo de encerramento/transferência.
+        // O estado atual AG volta a ser considerado; não existe bloqueio histórico.
         monitoredIds.delete(id);
         activeIds.delete(id);
         send("ATENDIMENTO_TRANSFERIDO", { id });
@@ -468,8 +455,7 @@
             );
             const leftWaitingQueue = queueWasLoaded && (
               !currentQueueItem ||
-              getStatus(currentQueueItem) !== "AG" ||
-              Boolean(normalizeId(currentQueueItem.id_atendente))
+              getStatus(currentQueueItem) !== "AG"
             );
             if (leftWaitingQueue) {
               // Só classifica como manual quando já existe snapshot da fila e
@@ -479,8 +465,7 @@
               debugLog("Possível confirmação manual ignorada: ainda não há evidência de que o atendimento saiu da fila AG.", {
                 id,
                 queueWasLoaded,
-                currentQueueStatus: getStatus(currentQueueItem),
-                currentQueueAttendantId: normalizeId(currentQueueItem?.id_atendente)
+                currentQueueStatus: getStatus(currentQueueItem)
               });
             }
           }
@@ -498,7 +483,6 @@
       const id = item?._id || item?.id;
       if (id && monitoredIds.has(id)) {
         monitoredIds.delete(id);
-        confirmedAssumptions.delete(id);
         activeIds.delete(id);
         send("ATENDIMENTO_TRANSFERIDO", { id });
       }
@@ -806,19 +790,39 @@
       socketReadyState: applicationSocket?.readyState,
       socketBackendReady
     });
-    const item = latestDepartmentItems.find(candidate => (candidate?._id || candidate?.id) === id);
-    if (!id || !item || getStatus(item) !== "AG" || normalizeId(item.id_atendente)) {
+
+    let item = latestDepartmentItems.find(candidate => (candidate?._id || candidate?.id) === id);
+    if (!id || !item || getStatus(item) !== "AG") {
       debugLog("Assunção abortada na validação do atendimento.", {
         id,
         itemFound: Boolean(item),
-        status: getStatus(item),
-        attendantId: normalizeId(item?.id_atendente)
+        status: getStatus(item)
       });
       return false;
     }
-    if (pendingAssumptions.has(id)) {
-      debugLog("Já existe uma solicitação pendente para este atendimento.", { id });
-      return true;
+
+    // Única proteção temporal contra emissões repetidas: reserva um horário
+    // global com intervalo mínimo de 3 segundos entre solicitações de assunção.
+    // A reserva é atômica dentro do bridge, inclusive se duas chamadas chegarem juntas.
+    const now = Date.now();
+    const waitMs = Math.max(0, nextAssumptionRequestAt - now);
+    nextAssumptionRequestAt = now + waitMs + 3000;
+    if (waitMs > 0) {
+      debugLog("Solicitação de assunção aguardando intervalo mínimo de 3 segundos.", {
+        id,
+        retryInMs: waitMs
+      });
+      await new Promise(resolve => setTimeout(resolve, waitMs));
+      // Após a pausa, usa novamente o estado mais recente da fila.
+      item = latestDepartmentItems.find(candidate => (candidate?._id || candidate?.id) === id);
+      if (!item || getStatus(item) !== "AG") {
+        debugLog("Assunção cancelada após a pausa: atendimento não está mais em AG.", {
+          id,
+          itemFound: Boolean(item),
+          status: getStatus(item)
+        });
+        return false;
+      }
     }
 
     const queueRecord = toQueueRecord(item);
@@ -843,7 +847,7 @@
     );
 
     if (!sent) {
-      pendingAssumptions.delete(id);
+      if (pendingAssumptions.get(id) === pending) pendingAssumptions.delete(id);
       debugLog("Solicitação não enviada; emitSocketEvent retornou false.", { id });
       return false;
     }
@@ -854,7 +858,7 @@
       timeoutMs: ASSUMPTION_CONFIRMATION_TIMEOUT
     });
     pending.timeout = setTimeout(() => {
-      if (!pendingAssumptions.has(id)) return;
+      if (pendingAssumptions.get(id) !== pending) return;
       debugLog("Timeout aguardando confirmação do servidor.", { id, elapsedMs: Date.now() - pending.startedAt });
       pendingAssumptions.delete(id);
       send("ASSUMIR_RESULTADO", {

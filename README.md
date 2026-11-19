@@ -1,4 +1,4 @@
-# Box Tools Network — v7.0.1
+# Box Tools Network — v7.0.0
 
 Extensão Chrome com ferramentas para suporte IXC, automação de atendimento e utilitários de rede.
 
@@ -59,14 +59,13 @@ A interface visual existente foi preservada:
 
 ## Cuidados de manutenção
 
-- As permissões declaradas em `manifest.json` devem corresponder a funcionalidades efetivamente utilizadas. Antes de adicionar uma permissão, verifique se uma API mais restrita atende ao caso de uso e documente a necessidade.
+- As permissões do `manifest.json` foram preservadas nesta limpeza. Não as altere sem uma revisão específica de compatibilidade.
 - Ao mover scripts, atualize todas as referências no manifesto, nas páginas HTML e nos caminhos gerados por `chrome.runtime.getURL`.
 - Não edite manualmente bundles compilados sem necessidade.
 - Testes locais de sintaxe e de referências não substituem a validação funcional no Chrome com o sistema IXC.
 
 ## Documentação complementar
 
-- `RELEASE_NOTES_V7.0.1.txt`: limpeza de permissões não utilizadas para adequação à revisão da Chrome Web Store.
 - `RELEASE_NOTES_V7.0.0.txt`: alterações e detalhes técnicos da versão.
 - `POLITICA_DE_PRIVACIDADE.txt`: política de privacidade.
 - `IPVFOO_NOTICE.txt` e `LICENSE-APACHE-2.0.txt`: atribuição e licença relacionadas à implementação do validador de IP.

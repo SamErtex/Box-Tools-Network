@@ -1,0 +1,10 @@
+Box Tools Network — v7.0.2
+
+OPA Auto:
+- Removido o bloqueio histórico por atendimentos já confirmados.
+- Removida a exclusão de registros da fila com base em id_atendente.
+- Elegibilidade da fila usa ID, status AG, departamento selecionado e regra opcional de 5 minutos.
+- Solicitações de atualização da fila limitadas a uma emissão a cada 3 segundos.
+- Solicitações de assunção limitadas a uma emissão a cada 3 segundos, com reserva serializada no page-bridge.
+- Mantido o controle temporário das solicitações em andamento para correlacionar confirmações e timeouts; ele não exclui atendimentos por histórico.
+- A validação de id_atendente permanece somente na confirmação de sucesso, não na seleção da fila.

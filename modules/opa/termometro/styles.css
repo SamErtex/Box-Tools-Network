@@ -1,0 +1,179 @@
+/* Termômetro do cliente — selo na lista lateral e painéis flutuantes. */
+.box-opa-humor-selo {
+  --box-opa-humor-cor: #9e9e9e;
+  display: inline-flex;
+  align-self: flex-start;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 3px;
+  margin: 3px 0 2px;
+  padding: 2px 4px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  cursor: help;
+  line-height: 1;
+  position: relative;
+  z-index: 2;
+}
+.box-opa-humor-selo__emoji { font-size: 14px; line-height: 1; }
+.box-opa-humor-selo__barra {
+  position: relative;
+  display: block;
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+}
+.box-opa-humor-selo__fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--box-opa-humor-cor);
+  transition: height 0.4s ease, background-color 0.4s ease;
+}
+.box-opa-humor-selo[data-categoria="desconhecido"] .box-opa-humor-selo__fill {
+  background: repeating-linear-gradient(0deg, #9e9e9e 0 3px, #bdbdbd 3px 6px);
+}
+.box-opa-humor-selo[data-categoria="desconhecido"] .box-opa-humor-selo__emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #9e9e9e;
+  color: #fff;
+  font: 700 11px Arial, sans-serif;
+}
+.box-opa-humor-selo[data-categoria="estressado"] .box-opa-humor-selo__emoji {
+  animation: box-opa-humor-pulse 1.6s ease-in-out infinite;
+}
+@keyframes box-opa-humor-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+.box-opa-humor-tooltip-lista {
+  display: none;
+  position: fixed;
+  z-index: 100000;
+  box-sizing: border-box;
+  width: 340px;
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid #5b6678;
+  border-radius: 8px;
+  background: #1f2633;
+  color: #f1f4f8;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font: 12px/1.45 Arial, Helvetica, sans-serif;
+  text-align: left;
+  text-shadow: none;
+  white-space: normal;
+}
+.box-opa-humor-tooltip-titulo { font-size: 13px; font-weight: 700; }
+.box-opa-humor-tooltip-data { margin-top: 4px; color: #d3dae5; }
+.box-opa-humor-tooltip-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 7px;
+  color: #b9c2cf;
+  font-size: 11px;
+}
+.box-opa-humor-tooltip-instrucao { margin-top: 5px; color: #9eabbc; font-size: 10px; }
+.box-opa-humor-ajuda {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #8793a5;
+  border-radius: 50%;
+  background: #354052;
+  color: #fff;
+  font: 700 12px/1 Arial, sans-serif;
+  cursor: help;
+}
+.box-opa-humor-ajuda:hover,
+.box-opa-humor-ajuda:focus-visible { background: #52627a; outline: 1px solid #c4d0df; }
+.box-opa-humor-ajuda:disabled { opacity: .45; cursor: not-allowed; }
+.box-opa-humor-tooltip-lista ul,
+.box-opa-humor-mensagens-flutuante ul {
+  list-style: none;
+  margin: 6px 0;
+  padding: 0;
+}
+.box-opa-humor-tooltip-lista li,
+.box-opa-humor-mensagens-flutuante li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.box-opa-humor-tooltip-lista small,
+.box-opa-humor-mensagens-flutuante small {
+  display: block;
+  margin-top: 2px;
+  color: #b9c2cf;
+  font-size: 10px;
+}
+.box-opa-humor-nota {
+  flex: 0 0 34px;
+  height: fit-content;
+  border-radius: 4px;
+  padding: 1px 0;
+  text-align: center;
+  font-weight: 700;
+}
+.box-opa-humor-nota--neg { background: #e53935; color: #fff; }
+.box-opa-humor-nota--neu { background: #fbc02d; color: #222; }
+.box-opa-humor-nota--pos { background: #43a047; color: #fff; }
+.box-opa-humor-nota--q { background: #8a94a3; color: #fff; }
+.box-opa-humor-nota--top { background: linear-gradient(135deg, #7c4dff, #00b0ff); color: #fff; }
+.box-opa-humor-mensagens-flutuante {
+  display: none;
+  position: fixed;
+  z-index: 100002;
+  box-sizing: border-box;
+  width: 380px;
+  height: 360px;
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 11px 12px;
+  border: 1px solid #65738a;
+  border-radius: 8px;
+  background: #1f2633;
+  color: #f1f4f8;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .42);
+  font: 12px/1.45 Arial, Helvetica, sans-serif;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.box-opa-humor-mensagens-titulo { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 700; }
+.box-opa-humor-mensagem-texto {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.box-opa-humor-sem-detalhes { color: #cbd5e1; padding: 5px 0; }
+@media (prefers-reduced-motion: reduce) {
+  .box-opa-humor-selo *, .box-opa-humor-selo { animation: none !important; transition: none !important; }
+}

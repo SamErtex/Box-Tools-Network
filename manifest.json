@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Box Tools Network",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "description": "Ferramentas para suporte IXC, automação de atendimento, análise de IP, acesso às chaves e DevTools.",
   "permissions": [
     "storage",
@@ -43,11 +43,19 @@
         "https://suporte.ixcsoft.com.br/*"
       ],
       "js": [
-        "modules/opa/content.js",
-        "modules/opa-externo/redirect.js"
+        "modules/opa/assuncao/content.js",
+        "modules/opa-externo/redirect.js",
+        "modules/opa/termometro/config.js",
+        "modules/opa/termometro/dom.js",
+        "modules/opa/termometro/humor-regras.js",
+        "modules/opa/termometro/humor.js",
+        "modules/opa/termometro/storage.js",
+        "modules/opa/termometro/termometro.js",
+        "modules/opa/termometro/main.js"
       ],
       "css": [
-        "modules/opa/styles.css"
+        "modules/opa/assuncao/styles.css",
+        "modules/opa/termometro/styles.css"
       ],
       "run_at": "document_idle"
     },
